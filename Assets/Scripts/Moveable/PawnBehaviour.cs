@@ -8,7 +8,7 @@ public abstract class PawnBehaviour : MonoBehaviour
 {
 	public Inventory inventory;
 	[SerializeField]
-	public SpecsHolder specs = new SpecsHolder();
+	public AtributesHolder attributes = new AtributesHolder();
 
 	[SerializeField]
 	public Weapon EquipedWeapon;
@@ -19,8 +19,8 @@ public abstract class PawnBehaviour : MonoBehaviour
 	protected void Awake()
 	{
 		inventory = GetComponent<Inventory>();
-		specs.AddStat(new MainSpec("Health", "Your health", 100));
-		specs.GetStat<MainSpec>("Health").OnValueZero += Die;
+		attributes.AddAtribute(new AtributeF("Health", "Your health", 100));
+		attributes.GetAtribute("Health").OnZero += Die;
 	}
 
 	public virtual void Attack(PawnBehaviour target)
@@ -33,7 +33,7 @@ public abstract class PawnBehaviour : MonoBehaviour
 	
 	public virtual void Use(Item item)
 	{
-		specs.AddModificator(item.modificators);
+		attributes.AddModificator(item.modificators);
 
 		inventory.RemoveItem(item);
 	}
@@ -57,7 +57,7 @@ public abstract class PawnBehaviour : MonoBehaviour
 
 	public virtual void TakeDamage(float value)
 	{
-		specs.GetStat<MainSpec>("Health").ValueChange(value);
+		attributes.GetAtribute<AtributeF>("Health").CurrentValue -= value;
 	}
 
 	public virtual void Die()

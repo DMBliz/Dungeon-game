@@ -20,8 +20,7 @@ public class Weapon : Item
 	{
 		if(timeToNextAttack >= Time.time && Vector2.Distance(gameObject.transform.position, target.transform.position) < weaponStats.RangeOfAttack)
 		{
-			timeToNextAttack = Time.time + Mathf.Clamp(weaponStats.TimeBetweenAttack - owner.specs.GetStat<BaseSpec>("Strength").Value * 2f / owner.specs.GetStat<BaseSpec>("Strength").MaxValue, 0.5f, weaponStats.TimeBetweenAttack);
-			
+			timeToNextAttack = Time.time + Mathf.Clamp(weaponStats.TimeBetweenAttack - owner.attributes.GetAtribute<AtributeF>("Strength").CurrentValue * 2f / owner.attributes.GetAtribute<AtributeF>("Strength").MaxValue, 0.5f, weaponStats.TimeBetweenAttack);
 		}
 	}
 

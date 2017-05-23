@@ -23,6 +23,6 @@ public class PlayerController : MonoBehaviour
 	{
 		//transform.Translate(dir * behaviour.specs.GetStat("Strength").Value * Time.deltaTime); 
 
-		gameObject.GetComponent<Rigidbody2D>().velocity = dir * (behaviour.specs.GetStat<BaseSpec>("Strength").Value / 2f / behaviour.specs.GetStat<BaseSpec>("Strength").MaxValue ) * 100f * Time.fixedDeltaTime;
+		gameObject.GetComponent<Rigidbody2D>().velocity = dir * (behaviour.attributes.GetAtribute<Atribute>("Strength").CurrentValue / 2f / behaviour.attributes.GetAtribute<Atribute>("Strength").MaxValue ) * 100f * Time.fixedDeltaTime;
 	}
 }

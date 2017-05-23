@@ -10,7 +10,7 @@ public class Item : MonoBehaviour
 	public event Action<Item> OnItemTransfer;
 
 	[SerializeField]
-    public Dictionary<string, BaseSpecModificator> modificators = new Dictionary<string, BaseSpecModificator>();
+    public List<IModificator> modificators = new List<IModificator>();
 	[SerializeField]
 	protected bool _isConsumable = false;
 	[SerializeField]

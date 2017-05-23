@@ -21,10 +21,6 @@ public class Player : PawnBehaviour
 	{
 		base.Awake();
 		player = this;
-
-		specs.AddStat(new MainSpec("Mana", "Your mana", 100));
-		specs.AddStat(new MainSpec("Stamina", "Your Stamina", 100));
-		specs.AddStat(new BaseSpec("Strength", "Your strength", 5,10));
 	}
 
 	void Start()
@@ -120,7 +116,7 @@ public class Player : PawnBehaviour
 
 	public override void Use(Item item)
 	{
-		specs.AddModificator(item.modificators);
+		attributes.AddModificator(item.modificators);
 		inventory.RemoveItem(item);
 	}
 

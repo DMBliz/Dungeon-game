@@ -129,12 +129,11 @@ public class DungeonGeneration : MonoBehaviour
 				{
 					if (x == lef.Room.x || x == lef.Room.right - 1 || y == lef.Room.y || y == lef.Room.bottom - 1)
 					{
-						
-						Map[x, y].Set(style.floors[rnd.Next(style.floors.Length)], false);
+						Map[x, y].Set(style.walls[rnd.Next(style.walls.Length)], false);
 					}
 					else
 					{
-						Map[x, y].Set(style.walls[rnd.Next(style.walls.Length)], true);
+						Map[x, y].Set(style.floors[rnd.Next(style.floors.Length)], true);
 					}
 				}
 			}
