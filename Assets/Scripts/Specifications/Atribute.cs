@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using System;
 
+[Serializable]
 public class Atribute : IAtribute
 {
 	public event Action OnZero;
-	private int minValue;
 	private int currentValue;
 	private int maxValue;
 	private string name;
@@ -41,10 +41,7 @@ public class Atribute : IAtribute
 	{
 		this.name = name;
 		this.description = description;
-		this.minValue = minValue;
 		this.maxValue = maxValue;
 		currentValue = minValue;
 	}
-
-
 }

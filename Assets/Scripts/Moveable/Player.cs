@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Player : PawnBehaviour
@@ -13,9 +14,10 @@ public class Player : PawnBehaviour
 	private Inventory findedInventory;
 	private Item findedItem;
 
+	[SerializeField]
 	private bool inInteraction = false;
-
-	private float SearchRadius=3f;
+	[SerializeField]
+	private float SearchRadius = 2f;
 
 	new void Awake()
 	{
@@ -41,7 +43,7 @@ public class Player : PawnBehaviour
 			yield return new WaitForSecondsRealtime(0.2f);
 			if (inInteraction)
 			{
-				if (Vector2.Distance(findedInventory.transform.position, transform.position) > SearchRadius)
+				if(!new List<Collider2D>(Physics2D.OverlapCircleAll(transform.position, SearchRadius)).Contains(findedInventory.GetComponent<Collider2D>()))
 				{
 					findedInventory = null;
 					UIManager.instance.HideUIInventory();
@@ -53,19 +55,27 @@ public class Player : PawnBehaviour
 				findedItem = null;
 				findedInventory = null;
 				Collider2D[] things = Physics2D.OverlapCircleAll(transform.position, SearchRadius);
+				float minDist = float.MaxValue;
+				Collider2D col = null;
 				for (int i = 0; i < things.Length; i++)
 				{
-					Inventory temp = things[i].GetComponent<Inventory>();
-					if (temp != null && temp != inventory) 
+					Inventory inv = things[i].GetComponent<Inventory>();
+					if (inv != null && inv != inventory || things[i].GetComponent<Item>() != null)
 					{
-						findedInventory = things[i].GetComponent<Inventory>();
-						break;
+						float dist = Vector2.Distance(this.transform.position, things[i].transform.position);
+
+						if (dist < minDist)
+						{
+							minDist = dist;
+							col = things[i];
+						}
 					}
-					if (things[i].GetComponent<Item>() != null)
-					{
-						findedItem = things[i].GetComponent<Item>();
-						break;
-					}
+				}
+
+				if (col != null)
+				{
+					findedInventory = col.GetComponent<Inventory>();
+					findedItem = col.GetComponent<Item>();
 				}
 
 				if (findedInventory != null)
@@ -90,6 +100,7 @@ public class Player : PawnBehaviour
 		{
 			findedInventory = null;
 			UIManager.instance.HideUIInventory();
+			UIManager.instance.HidePlayerInventory();
 			inInteraction = false;
 		}
 		else
@@ -98,6 +109,7 @@ public class Player : PawnBehaviour
 			{
 				inInteraction = true;
 				UIManager.instance.SetUIInventory(findedInventory);
+				UIManager.instance.ShowPlayerInventory();
 			}
 			else if (findedItem != null)
 			{
@@ -107,11 +119,6 @@ public class Player : PawnBehaviour
 
 			UIManager.instance.HideTextInfo();
 		}
-	}
-
-	public void Loot(Inventory lootTarget)
-	{
-		UIManager.instance.SetUIInventory(lootTarget);
 	}
 
 	public override void Use(Item item)

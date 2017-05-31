@@ -34,7 +34,10 @@ public class Slot : MonoBehaviour, IDropHandler
 
 	public void Clear()
 	{
-		Destroy(item.gameObject);
-		item = null;
+		if (item != null)
+		{
+			Destroy(item.gameObject);
+			item = null;
+		}
 	}
 }

@@ -3,21 +3,34 @@ using System.Collections.Generic;
 
 public class AtributesHolder : MonoBehaviour
 {
-	public List<IAtribute> Atributes = new List<IAtribute>();
+	[SerializeField]
+	private List<AtributeF> mainAtributes=new List<AtributeF>();
+	[SerializeField]
+	private List<Atribute> additAtributes=new List<Atribute>();
 	public List<IModificator> Modificators = new List<IModificator>();
-
-	public AtributesHolder()
-	{
-	}
 
 	public void AddAtribute(IAtribute atribute)
 	{
-		Atributes.Add(atribute);
+		if (atribute is Atribute)
+		{
+			additAtributes.Add(atribute as Atribute);
+		}
+		else if(atribute is AtributeF)
+		{
+			mainAtributes.Add(atribute as AtributeF);
+		}
 	}
 
 	public void RemoveAtribute(IAtribute atribute)
 	{
-		Atributes.Remove(atribute);
+		if (atribute is Atribute)
+		{
+			additAtributes.Remove(atribute as Atribute);
+		}
+		else if (atribute is AtributeF)
+		{
+			mainAtributes.Remove(atribute as AtributeF);
+		}
 	}
 
 	public void AddModificator(IModificator modificator)
@@ -37,11 +50,24 @@ public class AtributesHolder : MonoBehaviour
 
 	public T GetAtribute<T>(string name) where T : class
 	{
-		for (int i = 0; i < Atributes.Count; i++)
+		if (typeof(T)==typeof(Atribute))
 		{
-			if (Atributes[i].Name == name)
+			foreach (Atribute atr in additAtributes)
 			{
-				return (T)Atributes[i];
+				if (atr.Name == name)
+				{
+					return atr as T;
+				}
+			}
+		}
+		else if (typeof(T) == typeof(AtributeF))
+		{
+			foreach (AtributeF atr in mainAtributes)
+			{
+				if (atr.Name == name)
+				{
+					return atr as T;
+				}
 			}
 		}
 		return null;
@@ -49,11 +75,19 @@ public class AtributesHolder : MonoBehaviour
 
 	public IAtribute GetAtribute(string name)
 	{
-		for (int i = 0; i < Atributes.Count; i++)
+		foreach (AtributeF atr in mainAtributes)
 		{
-			if (Atributes[i].Name == name)
+			if (atr.Name == name)
 			{
-				return Atributes[i];
+				return atr;
+			}
+		}
+
+		foreach (Atribute atr in additAtributes)
+		{
+			if (atr.Name == name)
+			{
+				return atr;
 			}
 		}
 		return null;

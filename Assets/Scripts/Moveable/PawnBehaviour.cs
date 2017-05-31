@@ -8,7 +8,7 @@ public abstract class PawnBehaviour : MonoBehaviour
 {
 	public Inventory inventory;
 	[SerializeField]
-	public AtributesHolder attributes = new AtributesHolder();
+	public AtributesHolder attributes;
 
 	[SerializeField]
 	public Weapon EquipedWeapon;
@@ -16,9 +16,18 @@ public abstract class PawnBehaviour : MonoBehaviour
 	[SerializeField]
 	public PawnBehaviour EnemyTarget;
 
+	private bool isDead = false;
+
+	public bool IsDead
+	{
+		get { return isDead; }
+		set { isDead = value; }
+	}
+
 	protected void Awake()
 	{
 		inventory = GetComponent<Inventory>();
+		attributes = GetComponent<AtributesHolder>();
 		attributes.AddAtribute(new AtributeF("Health", "Your health", 100));
 		attributes.GetAtribute("Health").OnZero += Die;
 	}

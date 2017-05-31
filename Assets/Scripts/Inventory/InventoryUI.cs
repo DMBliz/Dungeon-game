@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public class InventoryUI : MonoBehaviour
+public class InventoryUI : MonoBehaviour//TODO: make inventory UI under dragging thing
 {
 	[SerializeField]
 	private Inventory _inventory;
@@ -62,7 +62,13 @@ public class InventoryUI : MonoBehaviour
 		for (int i = 0; i < transform.childCount; i++)
 		{
 			slots.Add(transform.GetChild(i).GetComponent<Slot>());
+			
+		}
+
+		for (int i = 0; i < slots.Count; i++)
+		{
 			slots[i].containerUI = this;
+			slots[i].Clear();
 		}
 	}
 

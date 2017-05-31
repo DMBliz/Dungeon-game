@@ -19,7 +19,6 @@ public class UIManager : MonoBehaviour
 
 	[SerializeField]
 	private GameObject ActionMenu;
-	private GameObject DropMenuAction;
 	private GameObject EquipMenuAction;
 	private GameObject ConsumeMenuAction;
 
@@ -38,7 +37,6 @@ public class UIManager : MonoBehaviour
 		instance = this;
 		inventoryUI = lootInventory.transform.GetChild(1).GetComponent<InventoryUI>();
 
-		DropMenuAction = ActionMenu.transform.GetChild(2).gameObject;
 		ConsumeMenuAction = ActionMenu.transform.GetChild(0).gameObject;
 		EquipMenuAction = ActionMenu.transform.GetChild(1).gameObject;
 
@@ -56,6 +54,7 @@ public class UIManager : MonoBehaviour
 		{
 			toolTip.transform.position = Input.mousePosition;
 		}
+
 		if (ActionMenu.activeInHierarchy && Input.GetMouseButtonDown(0))
 		{
 			HideInventoryMenu();
@@ -67,7 +66,14 @@ public class UIManager : MonoBehaviour
 
 		if (Input.GetKeyDown(KeyCode.I))
 		{
-			playerInventory.SetActive(!playerInventory.activeInHierarchy);
+			if (playerInventory.activeInHierarchy)
+			{
+				HidePlayerInventory();
+			}
+			else
+			{
+				ShowPlayerInventory();
+			}
 		}
 
 		if (Input.GetKeyDown(KeyCode.E))
@@ -87,6 +93,7 @@ public class UIManager : MonoBehaviour
 	public void HidePlayerInventory()
 	{
 		playerInventory.SetActive(false);
+		HideInventoryTooltip();
 	}
 
 	public void SetUIInventory(Inventory owner)
@@ -100,6 +107,7 @@ public class UIManager : MonoBehaviour
 	{
 		lootInventory.SetActive(false);
 		inventoryUI.inventory = null;
+		HideInventoryTooltip();
 	}
 
 	public void ShowInventoryMenu(bool showEquip=false, bool showConsume=false)
@@ -114,6 +122,7 @@ public class UIManager : MonoBehaviour
 	public void HideInventoryMenu()
 	{
 		ActionMenu.SetActive(false);
+		HideInventoryTooltip();
 	}
 
 	public void ShowInventoryTooltip(string text)

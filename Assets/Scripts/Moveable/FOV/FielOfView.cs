@@ -14,15 +14,29 @@ public class FielOfView
 	[SerializeField]
 	[Range(0, 360)]
 	public float Angle = 90f;
-	public GameObject player;
+	public PawnBehaviour player;
 	bool bIsSeePlayer = false;
+
+	[SerializeField]
+	private bool drawGizmos = false;
+
+	public FielOfView()
+	{
+	}
 
 	public FielOfView(PawnBehaviour owner)
 	{
 		this.owner = owner;
-		player = GameObject.FindGameObjectWithTag("Player");
+		player = GameObject.FindGameObjectWithTag("Player").GetComponent<PawnBehaviour>();
+		owner.StartCoroutine(Find());
 	}
-	
+
+	public void Init(PawnBehaviour owner)
+	{
+		this.owner = owner;
+		player = GameObject.FindGameObjectWithTag("Player").GetComponent<PawnBehaviour>();
+		owner.StartCoroutine(Find());
+	}
 
 	public IEnumerator Find()
 	{
@@ -35,11 +49,11 @@ public class FielOfView
 
 	void FindVisible()
 	{
-		if (player != null && Vector2.Distance(owner.transform.position, player.transform.position) < Radius)
+		if (player != null && !owner.IsDead && !player.IsDead && Vector2.Distance(owner.transform.position, player.transform.position) < Radius)
 		{
 			if (Vector2.Angle(owner.transform.up, (player.transform.position - owner.transform.position).normalized) < Angle / 2)
 			{
-				RaycastHit2D hit = Physics2D.Linecast(owner.transform.position, player.transform.position, WorldManager.worldManager.unWalkable);
+				RaycastHit2D hit = Physics2D.Linecast(owner.transform.position, player.transform.position, WorldManager.instance.unWalkable);
 				if (hit.collider == null) 
 				{
 					if (!bIsSeePlayer)
@@ -89,7 +103,7 @@ public class FielOfView
 
 	public void OnDrawGizmos()
 	{
-		if (owner != null)
+		if (owner != null && drawGizmos)
 		{
 			Gizmos.color = Color.white;
 			Gizmos.DrawWireSphere(owner.transform.position, Radius);

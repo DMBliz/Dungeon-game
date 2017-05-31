@@ -3,18 +3,32 @@ using System.Collections;
 
 public class TileInfo
 {
-	public Sprite sprite;
-	public bool walkable;
+	private Sprite sprite;
+	private bool walkable;
+	private bool haveObject;
 
-	public TileInfo(Sprite sprite,bool walkable)
+	public Sprite Sprite
 	{
-		this.sprite = sprite;
-		this.walkable = walkable;
+		get { return sprite; }
+		set { sprite = value; }
 	}
 
-	public void Set(Sprite sprite, bool walkable)
+	public bool Walkable
+	{
+		get { return walkable; }
+		set { walkable = value; }
+	}
+
+	public bool HaveObject
+	{
+		get { return haveObject; }
+		set { haveObject = value; }
+	}
+
+	public TileInfo(Sprite sprite, bool walkable, bool haveObject=false)
 	{
 		this.sprite = sprite;
 		this.walkable = walkable;
+		this.haveObject = haveObject;
 	}
 }

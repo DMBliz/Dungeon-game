@@ -19,6 +19,8 @@ public class Grid : MonoBehaviour
 
 	public void Start()
 	{
+		DungeonGeneration dg = GameObject.FindGameObjectWithTag("Dungeon").GetComponent<DungeonGeneration>();
+		gridWorldSize = new Vector2(dg.Width, dg.Height);
 		nodeDiameter = nodeRadius * 2;
 		gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
 		gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
@@ -105,21 +107,71 @@ public class Grid : MonoBehaviour
 	public List<Node> GetNeighbours(Node node)
 	{
 		List<Node> neighbours = new List<Node>();
+
+		bool haveCollider = false;
+
 		for (int i = -1; i <= 1; i++)
 		{
 			for (int j = -1; j <= 1; j++)
 			{
-				if(i==0 && j == 0)
+				if (i == 0 && j == 0)
 				{
 					continue;
 				}
 				int checkX = node.gridPosX + i;
 				int checkY = node.gridPosY + j;
 
-				if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY) 
+				if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY)
 				{
-					neighbours.Add(map[checkX, checkY]);
+					if (map[checkX, checkY].haveCollider)
+					{
+						haveCollider = true;
+						break;
+					}
 				}
+			}
+		}
+
+		if (!haveCollider)
+		{
+			for (int i = -1; i <= 1; i++)
+			{
+				for (int j = -1; j <= 1; j++)
+				{
+					if (i == 0 && j == 0)
+					{
+						continue;
+					}
+					int checkX = node.gridPosX + i;
+					int checkY = node.gridPosY + j;
+
+					if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY)
+					{
+						neighbours.Add(map[checkX, checkY]);
+					}
+				}
+			}
+		}
+		else
+		{
+			if (node.gridPosX + 1 < gridSizeX)
+			{
+				neighbours.Add(map[node.gridPosX + 1, node.gridPosY]);
+			}
+
+			if (node.gridPosX - 1 > 0)
+			{
+				neighbours.Add(map[node.gridPosX - 1, node.gridPosY]);
+			}
+
+			if (node.gridPosY + 1 < gridSizeY)
+			{
+				neighbours.Add(map[node.gridPosX, node.gridPosY + 1]);
+			}
+
+			if (node.gridPosY - 1 > 0)
+			{
+				neighbours.Add(map[node.gridPosX, node.gridPosY - 1]);
 			}
 		}
 		return neighbours;
@@ -134,7 +186,7 @@ public class Grid : MonoBehaviour
 			{
 				Gizmos.color = !item.haveCollider ? Color.white : Color.red;
 				Gizmos.color = !item.haveCollider && !item.walkable ? Color.blue : Gizmos.color;
-				Gizmos.DrawCube(item.worldPosition, Vector3.one * nodeDiameter);
+				Gizmos.DrawCube(item.worldPosition, Vector3.one * (nodeDiameter-0.1f));
 			}
 		}
 	}

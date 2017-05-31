@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 
+[Serializable]
 public class AtributeF : IAtribute
 {
 	public event Action OnZero;

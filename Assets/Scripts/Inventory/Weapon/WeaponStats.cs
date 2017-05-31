@@ -13,10 +13,10 @@ public class WeaponStats
 	[SerializeField]
 	private float maxDamage;
 
-	public float RangeOfAttack { get { return rangeOfAttack; } }
-	public float TimeBetweenAttack { get { return timeBetweenAttack; } }
-	public float MinDamage { get { return minDamage; } }
-	public float MaxDamage { get { return maxDamage; } }
+	public float RangeOfAttack { get { return rangeOfAttack; } set { rangeOfAttack = value; } }
+	public float TimeBetweenAttack { get { return timeBetweenAttack; } set { timeBetweenAttack = value; } }
+	public float MinDamage { get { return minDamage; } set { minDamage = value; } }
+	public float MaxDamage { get { return maxDamage; } set { maxDamage = value; } }
 
 	public WeaponStats()
 	{

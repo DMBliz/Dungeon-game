@@ -33,16 +33,16 @@ public class Item : MonoBehaviour
 
 	public virtual string ToolTipDescription
 	{
-		get { return itemName + "\n\nDescription:" + description; }
+		get { return itemName + "\n\n" + description; }
 	}
 
 	private SpriteRenderer spriteRenderer;
-	private Collider2D collider;
+	private Collider2D Collider;
 
 	void Awake()
 	{
 		spriteRenderer = GetComponent<SpriteRenderer>();
-		collider = GetComponent<Collider2D>();
+		Collider = GetComponent<Collider2D>();
 	}
 
 	public virtual void Initialize(string name, string description, bool isConsumable=false, bool isEquipable=false)
@@ -83,13 +83,13 @@ public class Item : MonoBehaviour
 	public void MoveToInventory()
 	{
 		spriteRenderer.enabled = false;
-		collider.enabled = false;
+		Collider.enabled = false;
 	}
 
 	public void MoveToWorld(Vector2 position)
 	{
 		spriteRenderer.enabled = true;
-		collider.enabled = true;
+		Collider.enabled = true;
 		transform.position = position;
 	}
 

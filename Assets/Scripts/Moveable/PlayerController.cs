@@ -3,7 +3,6 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
-	
 	Player behaviour;
 	Vector2 dir;
 	// Use this for initialization
@@ -23,6 +22,6 @@ public class PlayerController : MonoBehaviour
 	{
 		//transform.Translate(dir * behaviour.specs.GetStat("Strength").Value * Time.deltaTime); 
 
-		gameObject.GetComponent<Rigidbody2D>().velocity = dir * (behaviour.attributes.GetAtribute<Atribute>("Strength").CurrentValue / 2f / behaviour.attributes.GetAtribute<Atribute>("Strength").MaxValue ) * 100f * Time.fixedDeltaTime;
+		//gameObject.GetComponent<Rigidbody2D>().velocity = dir * (behaviour.attributes.GetAtribute<Atribute>("Strength").CurrentValue / 2f / behaviour.attributes.GetAtribute<Atribute>("Strength").MaxValue ) * 100f * Time.fixedDeltaTime;
 	}
 }
