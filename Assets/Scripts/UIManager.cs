@@ -25,6 +25,16 @@ public class UIManager : MonoBehaviour
 	[SerializeField]
 	private GameObject interactionText;
 
+	[Header("Bars")]
+	private GameObject healthBar;
+	private Slider healthBarSlider;
+
+	[SerializeField]
+	private GameObject modificatorsPanel;
+	[SerializeField]
+	private GameObject modificatorImage;
+
+
 	public event Action OnDropAction;
 	public event Action OnUseAction;
 	public event Action OnEquipAction;
@@ -41,6 +51,8 @@ public class UIManager : MonoBehaviour
 		EquipMenuAction = ActionMenu.transform.GetChild(1).gameObject;
 
 		toolTipText = toolTip.transform.GetChild(0).GetComponent<Text>();
+
+		healthBarSlider = healthBar.GetComponent<Slider>();
 	}
 
 	void Start ()
@@ -169,5 +181,22 @@ public class UIManager : MonoBehaviour
 				break;
 		}
 		HideInventoryMenu();
+	}
+
+	public void SetHealthBarValue(float percent)
+	{
+		healthBarSlider.value = percent;
+	}
+
+	public void AddEffect(BaseModificator modificator)
+	{
+		GameObject tmp = Instantiate(modificatorImage);
+		modificatorImage.transform.parent = modificatorsPanel.transform;
+		tmp.GetComponent<UIEffect>().Init(modificator);
+	}
+
+	public void RemoveEffect(BaseModificator modificator)
+	{
+		
 	}
 }

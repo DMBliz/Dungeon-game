@@ -11,26 +11,23 @@ public class Weapon : Item
 
 	public virtual void Initialize(string description, WeaponStats stats)
 	{
-		_isEquipable = true;
 		this.weaponStats = stats;
-		base.Initialize(description, _isConsumable, _isEquipable);
+		base.Initialize(description);
+		IsEquipable = true;
 	}
 
 	public virtual void Attack(PawnBehaviour owner, PawnBehaviour target)
 	{
 		if(timeToNextAttack >= Time.time && Vector2.Distance(gameObject.transform.position, target.transform.position) < weaponStats.RangeOfAttack)
 		{
-			timeToNextAttack = Time.time + Mathf.Clamp(weaponStats.TimeBetweenAttack - owner.attributes.GetAtribute<AtributeF>("Strength").CurrentValue * 2f / owner.attributes.GetAtribute<AtributeF>("Strength").MaxValue, 0.5f, weaponStats.TimeBetweenAttack);
+			target.TakeDamage(weaponStats.GetDamage, weaponStats.Effects);
 		}
 	}
 
-	public override void Equip(PawnBehaviour owner)
+	public void Equip(PawnBehaviour owner)
 	{
-		if (_isEquipable)
-		{
-			owner.EquipedWeapon = this;
-			owner.inventory.RemoveItem(this);
-		}
+		owner.EquipedWeapon = this;
+		owner.inventory.RemoveItem(this);
 	}
 
 	public Weapon Fist()

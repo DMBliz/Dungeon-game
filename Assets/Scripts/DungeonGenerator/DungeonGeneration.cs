@@ -57,8 +57,6 @@ public class DungeonGeneration : MonoBehaviour
 	[SerializeField]
 	private List<GameObject> spawnedThings;
 
-	private List<TestThings> tThings = new List<TestThings>();
-
 	[Header("Enemys settings")]
 	[SerializeField]
 	private GameObject[] availableEnemys;
@@ -68,9 +66,6 @@ public class DungeonGeneration : MonoBehaviour
 
 	[SerializeField]
 	private int maxEnemysInRoom = 2;
-
-	[SerializeField]
-	private List<TestEnemy> tEnemys = new List<TestEnemy>();
 
 	[SerializeField]
 	private int minPatrolPoints = 3;
@@ -154,8 +149,6 @@ public class DungeonGeneration : MonoBehaviour
 		CheckDist();
 		SpawnThings();
 		SpawnEnemys();
-		//TestSpawnThings();
-		//TestSpawnEnemys();
 	}
 
 	void RootToArrays(Leaf root)
@@ -325,67 +318,12 @@ public class DungeonGeneration : MonoBehaviour
 		}
 	}
 
-	void TestSpawnThings()
-	{
-		foreach (Rectangle room in rooms)
-		{
-			for (int x = room.left + 1; x < room.right - 1; x++)
-			{
-				for (int y = room.top + 1; y < room.bottom - 1; y++)
-				{
-					int value = rnd.Next(0, 1000);
-					if (value > 0 && value < 10)
-					{
-						tThings.Add(new TestThings(new Rectangle(this.x + x, this.y + y, 1, 1), EThingType.Container));
-						Map[x, y].HaveObject = true;
-					}
-					else if (value > 10 && value < 30)
-					{
-						tThings.Add(new TestThings(new Rectangle(this.x + x, this.y + y, 1, 1), EThingType.Furniture));
-						Map[x, y].HaveObject = true;
-					}
-					else if (value > 30 && value < 35)
-					{
-						tThings.Add(new TestThings(new Rectangle(this.x + x, this.y + y, 1, 1), EThingType.Thing));
-						Map[x, y].HaveObject = true;
-					}
-				}
-			}
-		}
-	}
-
-	void TestSpawnEnemys()
-	{
-		foreach (Rectangle room in rooms)
-		{
-			int enemyCount = 0;
-			for (int x = room.left + 1; x < room.right - 1; x++)
-			{
-				for (int y = room.top + 1; y < room.bottom - 1; y++)
-				{
-					if (!Map[x, y].HaveObject && enemyCount < maxEnemysInRoom)
-					{
-						int value = rnd.Next(0, 1000);
-						if (value > 0 && value < 10)
-						{
-							TestEnemy tEnemy = new TestEnemy(new Rectangle(this.x + x, this.y + y, 1, 1));
-							tEnemys.Add(tEnemy);
-							Map[x, y].HaveObject = true;
-							enemyCount++;
-							TestMakePatrolPoints(tEnemy, room);
-						}
-					}
-				}
-			}
-		}
-	}
-
 	void TestMakePatrolPoints(TestEnemy enemy, Rectangle room)
 	{
 		enemy.PatrolPoints.Add(RectangleToWorld(enemy.Pos));
 		int pointsCount = rnd.Next(minPatrolPoints, maxPatrolPoints);
 
-		for (int i = 1; i < maxPatrolPoints; i++)
+		for (int i = 1; i < pointsCount; i++)
 		{
 			int x = 0;
 			int y = 0;
@@ -429,7 +367,6 @@ public class DungeonGeneration : MonoBehaviour
 		{
 			DrawRoomsGizmos();
 		}
-		DrawTestThings();
 	}
 
 	void DrawRoomsGizmos()
@@ -448,40 +385,6 @@ public class DungeonGeneration : MonoBehaviour
 			foreach (Rectangle corridor in corridors)
 			{
 				Gizmos.DrawWireCube(RectangleToWorld(corridor), new Vector3(corridor.width, corridor.height, 1));
-			}
-		}
-	}
-
-	void DrawTestThings()
-	{
-		foreach (TestThings thing in tThings)
-		{
-			switch (thing.thingType)
-			{
-				case EThingType.Container:
-					Gizmos.color = Color.yellow;
-					break;
-				case EThingType.Furniture:
-					Gizmos.color = Color.green;
-					break;
-				case EThingType.Thing:
-					Gizmos.color = Color.cyan;
-					break;
-			}
-			Gizmos.DrawWireCube(RectangleToWorld(thing.pos), new Vector3(thing.pos.width, thing.pos.height, 1));
-		}
-
-		foreach (TestEnemy enemy in tEnemys)
-		{
-			Gizmos.color = Color.red;
-			Gizmos.DrawWireCube(RectangleToWorld(enemy.Pos), new Vector3(enemy.Pos.width, enemy.Pos.height, 1));
-			if (enemy.ShowPoints)
-			{
-				Gizmos.color = Color.magenta;
-				foreach (Vector2 point in enemy.PatrolPoints)
-				{
-					Gizmos.DrawSphere(point, 0.5f);
-				}
 			}
 		}
 	}

@@ -33,6 +33,16 @@ public class Player : PawnBehaviour
 		inventory.AddItem(Instantiate(someItemPrefab3).GetComponent<Item>());
 		inventory.AddItem(Instantiate(someItemPrefab).GetComponent<Item>());
 		StartCoroutine(FindInventory());
+		specs.OnAddModificator += AddModificator;
+		specs.OnRemoveModificator += RemoveModificator;
+	}
+
+	public override void Attack(PawnBehaviour target)
+	{
+		if (Vector2.Angle(transform.position, target.transform.position - transform.position) < 20f)
+		{
+			EquipedWeapon.Attack(this, target);
+		}
 	}
 
 	IEnumerator FindInventory()
@@ -123,8 +133,26 @@ public class Player : PawnBehaviour
 
 	public override void Use(Item item)
 	{
-		attributes.AddModificator(item.modificators);
+		specs.AddEffects(item.effects);
+
 		inventory.RemoveItem(item);
+	}
+
+	public override void TakeDamage(float value, List<WeaponEffect> effects)
+	{
+		base.TakeDamage(value, effects);
+		BaseAttribute health = specs.GetStat<BaseAttribute>("Health");
+		UIManager.instance.SetHealthBarValue(health.FinalValue / health.MaxValue);
+	}
+
+	public void AddModificator(BaseModificator modificator)
+	{
+		UIManager.instance.AddEffect(modificator);
+	}
+
+	public void RemoveModificator(BaseModificator modificator)
+	{
+		UIManager.instance.RemoveEffect(modificator);
 	}
 
 	public void OnDrawGizmos()

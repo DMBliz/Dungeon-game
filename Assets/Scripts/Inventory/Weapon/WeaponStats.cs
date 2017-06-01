@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -12,11 +13,15 @@ public class WeaponStats
 	private float minDamage;
 	[SerializeField]
 	private float maxDamage;
+	[SerializeField]
+	private List<WeaponEffect> effects = new List<WeaponEffect>();
 
 	public float RangeOfAttack { get { return rangeOfAttack; } set { rangeOfAttack = value; } }
 	public float TimeBetweenAttack { get { return timeBetweenAttack; } set { timeBetweenAttack = value; } }
 	public float MinDamage { get { return minDamage; } set { minDamage = value; } }
 	public float MaxDamage { get { return maxDamage; } set { maxDamage = value; } }
+	public float GetDamage { get { return UnityEngine.Random.Range(minDamage, maxDamage); } }
+	public List<WeaponEffect> Effects {get { return effects; } }
 
 	public WeaponStats()
 	{
@@ -33,4 +38,5 @@ public class WeaponStats
 		this.minDamage = minDamage;
 		this.maxDamage = maxDamage;
 	}
+
 }

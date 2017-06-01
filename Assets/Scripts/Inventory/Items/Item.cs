@@ -10,26 +10,37 @@ public class Item : MonoBehaviour
 	public event Action<Item> OnItemTransfer;
 
 	[SerializeField]
-    public List<IModificator> modificators = new List<IModificator>();
-	[SerializeField]
-	protected bool _isConsumable = false;
-	[SerializeField]
-	protected bool _isEquipable = false;
-	public bool isConsumable { get { return _isConsumable; } }
-	public bool IsEquipable { get { return _isEquipable; } }
-
-	[SerializeField]
-	Sprite itemSprite;
-
-	[SerializeField]
-	public Sprite UISprite;
-
-	[SerializeField]
 	public string itemName;
 	[SerializeField]
 	public string description;
 	[SerializeField]
 	public int id;
+
+	[SerializeField]
+	private bool isConsumable;
+	[SerializeField]
+	private bool isEquipable;
+
+	public bool IsConsumable
+	{
+		get { return isConsumable; }
+		protected set { isConsumable = value; }
+	}
+
+	public bool IsEquipable
+	{
+		get { return isEquipable; }
+		protected set { isEquipable = value; }
+	}
+
+	[SerializeField]
+	public Sprite itemSprite;
+
+	[SerializeField]
+	public Sprite UISprite;
+
+	[SerializeField]
+	public List<Effect> effects = new List<Effect>();
 
 	public virtual string ToolTipDescription
 	{
@@ -45,40 +56,17 @@ public class Item : MonoBehaviour
 		Collider = GetComponent<Collider2D>();
 	}
 
-	public virtual void Initialize(string name, string description, bool isConsumable=false, bool isEquipable=false)
+	public virtual void Initialize(string name, string description)
 	{
 		this.itemName = name;
 		this.description = description;
-		this._isConsumable = isConsumable;
-		this._isEquipable = isEquipable;
 	}
 
-	public virtual void Initialize(string description, bool isConsumable = false, bool isEquipable = false)
+	public virtual void Initialize(string description)
 	{
 		this.itemName = GetType().ToString();
 		this.description = description;
-		this._isConsumable = isConsumable;
-		this._isEquipable = isEquipable;
 	}
-
-	public virtual void Consume(PawnBehaviour owner)
-	{
-		if (_isConsumable)
-		{
-			owner.Use(this);
-			Destroy(gameObject);
-		}
-	}
-
-
-    public virtual void Equip(PawnBehaviour owner)
-    {
-		if (_isEquipable)
-		{
-			owner.Equip(this);
-			spriteRenderer.sprite = itemSprite;
-		}
-    }
 
 	public void MoveToInventory()
 	{
@@ -99,8 +87,6 @@ public class Item : MonoBehaviour
 		{
 			OnItemDrop(this);
 		}
-
-		//TODO: realise item drop to the world
 	}
 
 	public virtual void Transfer(Inventory newOwner)

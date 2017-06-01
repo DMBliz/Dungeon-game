@@ -89,13 +89,13 @@ public class ItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 
 	public void Equip()
 	{
-		item.Equip(currentSlot.containerUI.inventory.gameObject.GetComponent<PawnBehaviour>());
+		currentSlot.containerUI.inventory.GetComponent<PawnBehaviour>().Equip(item);
 		UnSubcribeActions();
 	}
 
 	public void Consume()
 	{
-		item.Consume(currentSlot.containerUI.inventory.gameObject.GetComponent<PawnBehaviour>());
+		currentSlot.containerUI.inventory.GetComponent<PawnBehaviour>().Use(item);
 		UnSubcribeActions();
 	}
 
@@ -117,7 +117,7 @@ public class ItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 	{
 		if (eventData.button == PointerEventData.InputButton.Right)
 		{
-			UIManager.instance.ShowInventoryMenu(item.IsEquipable, item.isConsumable);
+			UIManager.instance.ShowInventoryMenu(item.IsEquipable, item.IsEquipable);
 			UIManager.instance.OnDropAction += Drop;
 			UIManager.instance.OnEquipAction += Equip;
 			UIManager.instance.OnUseAction += Consume;
