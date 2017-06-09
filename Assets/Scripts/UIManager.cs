@@ -9,9 +9,9 @@ public class UIManager : MonoBehaviour
 	[Header("Inventory")]
 	[SerializeField]
 	private GameObject lootInventory;
-	private InventoryUI inventoryUI;
+	public InventoryUI inventoryUI;
 	[SerializeField]
-	private GameObject playerInventory;
+	public GameObject playerInventory;
 
 	[SerializeField]
 	private GameObject toolTip;
@@ -26,14 +26,13 @@ public class UIManager : MonoBehaviour
 	private GameObject interactionText;
 
 	[Header("Bars")]
+	[SerializeField]
 	private GameObject healthBar;
 	private Slider healthBarSlider;
+	private Text healthBarText;
 
 	[SerializeField]
-	private GameObject modificatorsPanel;
-	[SerializeField]
-	private GameObject modificatorImage;
-
+	private UIModificatorPanel modificatorsPanel;
 
 	public event Action OnDropAction;
 	public event Action OnUseAction;
@@ -53,6 +52,7 @@ public class UIManager : MonoBehaviour
 		toolTipText = toolTip.transform.GetChild(0).GetComponent<Text>();
 
 		healthBarSlider = healthBar.GetComponent<Slider>();
+		healthBarText = healthBar.transform.GetChild(2).GetComponent<Text>();
 	}
 
 	void Start ()
@@ -65,15 +65,6 @@ public class UIManager : MonoBehaviour
 		if (toolTip.activeInHierarchy)
 		{
 			toolTip.transform.position = Input.mousePosition;
-		}
-
-		if (ActionMenu.activeInHierarchy && Input.GetMouseButtonDown(0))
-		{
-			HideInventoryMenu();
-			if (OnNoneAction != null)
-			{
-				OnNoneAction();
-			}
 		}
 
 		if (Input.GetKeyDown(KeyCode.I))
@@ -114,7 +105,7 @@ public class UIManager : MonoBehaviour
 		inventoryUI.inventory = owner;
 		inventoryUI.transform.parent.GetChild(0).GetComponent<Text>().text = owner.name;
 	}
-
+	 
 	public void HideUIInventory()
 	{
 		lootInventory.SetActive(false);
@@ -122,13 +113,33 @@ public class UIManager : MonoBehaviour
 		HideInventoryTooltip();
 	}
 
-	public void ShowInventoryMenu(bool showEquip=false, bool showConsume=false)
+	public void ShowInventoryMenu(bool isConsumable,bool isEquipable)
 	{
 		ActionMenu.SetActive(true);
-		EquipMenuAction.SetActive(showEquip);
-		ConsumeMenuAction.SetActive(showConsume);
+		EquipMenuAction.SetActive(isEquipable);
+		ConsumeMenuAction.SetActive(isConsumable);
 		ActionMenu.transform.position = Input.mousePosition;
 		HideInventoryTooltip();
+	}
+
+	public void InventoryMenuSelect(int button)
+	{
+		switch (button)
+		{
+			case 0:
+				if (OnDropAction != null) OnDropAction();
+				break;
+			case 1:
+				if (OnUseAction != null) OnUseAction();
+				break;
+			case 2:
+				if (OnEquipAction != null) OnEquipAction();
+				break;
+			default:
+				if (OnNoneAction != null) OnNoneAction();
+				break;
+		}
+		HideInventoryMenu();
 	}
 
 	public void HideInventoryMenu()
@@ -163,40 +174,19 @@ public class UIManager : MonoBehaviour
 		interactionText.GetComponent<Text>().text = "";
 	}
 
-	public void ActionMenuClick(int button)
+	public void SetHealthBarValue(float currentValue, float maxValue)
 	{
-		switch (button)
-		{
-			case 0:
-				if (OnDropAction != null)
-					OnDropAction();
-				break;
-			case 1:
-				if (OnUseAction != null)
-					OnUseAction();
-				break;
-			case 2:
-				if (OnEquipAction != null)
-					OnEquipAction();
-				break;
-		}
-		HideInventoryMenu();
-	}
-
-	public void SetHealthBarValue(float percent)
-	{
-		healthBarSlider.value = percent;
+		healthBarSlider.value = currentValue / maxValue;
+		healthBarText.text = currentValue.ToString("####") + "/" + maxValue.ToString("####");
 	}
 
 	public void AddEffect(BaseModificator modificator)
 	{
-		GameObject tmp = Instantiate(modificatorImage);
-		modificatorImage.transform.parent = modificatorsPanel.transform;
-		tmp.GetComponent<UIEffect>().Init(modificator);
+		modificatorsPanel.AddModificator(modificator);
 	}
 
 	public void RemoveEffect(BaseModificator modificator)
 	{
-		
+		modificatorsPanel.RemoveModificator(modificator);
 	}
 }

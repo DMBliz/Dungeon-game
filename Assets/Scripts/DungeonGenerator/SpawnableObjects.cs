@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
+using Random = UnityEngine.Random;
 
 [Serializable]
 public class SpawnableObjects
@@ -46,5 +47,10 @@ public class SpawnableObjects
 			}
 		}*/
 		return ret;
+	}
+
+	public Thing GetRandomThing()
+	{
+		return items.spawnableObjects[Random.Range(0, items.spawnableObjects.Count)];
 	}
 }

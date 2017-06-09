@@ -76,7 +76,7 @@ public class InventoryUI : MonoBehaviour//TODO: make inventory UI under dragging
 	{
 		for (int i = 0; i < slots.Count; i++)
 		{
-			if (slots[i].ItemUi.StoredItem == item)
+			if (slots[i].ItemUi != null && slots[i].ItemUi.StoredItem == item)
 			{
 				return slots[i];
 			}

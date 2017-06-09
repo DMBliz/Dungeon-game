@@ -93,7 +93,6 @@ public class FielOfView
 		angleDeg += owner.transform.eulerAngles.z + 90f;
 
 		return new Vector2(Mathf.Cos(angleDeg * Mathf.Deg2Rad), Mathf.Sin(angleDeg * Mathf.Deg2Rad));
-		
 	}
 
 	public float AngleFromDir(Vector2 dir)

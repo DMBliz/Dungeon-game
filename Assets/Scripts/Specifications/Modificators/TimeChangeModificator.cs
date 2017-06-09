@@ -9,31 +9,27 @@ public class TimeChangeModificator : TimeModificator
 	public event Action<TimeChangeModificator> OnValueChange;
 	[SerializeField]
 	private int coolDownTime;
-	private float baseValue;
 
 	public TimeChangeModificator(string name, string description, ModificatorType type, float value, int totalTime, int coolDownTime) : base(name, description, type, value, totalTime)
 	{
 		this.coolDownTime = coolDownTime;
-		baseValue = value;
 	}
 
-	protected override void Process()
+	protected override IEnumerator Process()
 	{
-		while (true)
+		while (Time.time < endTime)
 		{
-			if (Time.time > endTime)
-				break;
-
-			value += baseValue;
-
+			yield return new WaitForSeconds(coolDownTime);
 			OnChange();
-			Thread.Sleep(coolDownTime);
 		}
+
+		OnEnd();
 	}
 
 	void OnChange()
 	{
 		if (OnValueChange != null)
 			OnValueChange(this);
+
 	}
 }

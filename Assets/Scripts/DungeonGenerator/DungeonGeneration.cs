@@ -35,6 +35,12 @@ public class DungeonGeneration : MonoBehaviour
 	[Header("Global settings")]
 	[SerializeField]
 	private bool drawRooms = false;
+	[SerializeField]
+	private GameObject enter;
+	[SerializeField]
+	private GameObject exit;
+	[SerializeField]
+	private GameObject Player;
 
 	[Header("Style settings")]
 	[SerializeField]
@@ -72,6 +78,12 @@ public class DungeonGeneration : MonoBehaviour
 	[SerializeField]
 	private int maxPatrolPoints = 6;
 
+	[Header("Things Settings")]
+	[Range(0,20)]
+	private int minSpawnThingsCount = 2;
+	[Range(0, 25)]
+	private int maxSpawnThingsCount = 5;
+
 	private System.Random rnd;
 
 	private void Awake()
@@ -80,27 +92,7 @@ public class DungeonGeneration : MonoBehaviour
 		Map = new TileInfo[width, height];
 	}
 
-	public void SetupSettings(Rectangle MapPosSize)
-	{
-		rnd = new System.Random(seed.GetHashCode());
-		width = MapPosSize.width;
-		height = MapPosSize.height;
-		x = MapPosSize.x;
-		y = MapPosSize.y;
 
-		Map = new TileInfo[width, height];
-	}
-
-	public void SetupSettings(int x, int y, int width, int height)
-	{
-		rnd = new System.Random(seed.GetHashCode());
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-
-		Map = new TileInfo[width, height];
-	}
 
 	public void Generate()
 	{
@@ -148,6 +140,7 @@ public class DungeonGeneration : MonoBehaviour
 		DrawHalls();
 		CheckDist();
 		SpawnThings();
+		SpawnEnterExit();
 		SpawnEnemys();
 	}
 
@@ -251,7 +244,7 @@ public class DungeonGeneration : MonoBehaviour
 		return false;
 	}
 
-	public void SpawnThings()
+	void SpawnThings()
 	{
 		foreach (Rectangle room in rooms)
 		{
@@ -268,13 +261,30 @@ public class DungeonGeneration : MonoBehaviour
 						GameObject spawnedThing = Instantiate(spawnThing.thingObject, ToWorldPosition(new Vector2(x, y)), new Quaternion());
 						spawnedThings.Add(spawnedThing);
 						spawnedThing.transform.parent = transform.GetChild(1);
+						Inventory temp = spawnedThing.GetComponent<Inventory>();
+						if (temp != null)
+						{
+							AddItemsToInventory(temp);
+						}
 					}
 				}
 			}
 		}
 	}
 
-	public void SpawnEnemys()
+	void AddItemsToInventory(Inventory inventory)
+	{
+		int itemsCount = rnd.Next(minSpawnThingsCount, maxSpawnThingsCount);
+
+		for (int i = 0; i < itemsCount; i++)
+		{
+			Thing item = _spawnableObjects.GetRandomThing();
+			GameObject temp = Instantiate(item.thingObject, ToWorldPosition(new Vector2(inventory.transform.position.x, inventory.transform.position.y)), new Quaternion());
+			inventory.AddItem(temp.GetComponent<Item>());
+		}
+	}
+
+	void SpawnEnemys()
 	{
 		foreach (Rectangle room in rooms)
 		{
@@ -292,6 +302,7 @@ public class DungeonGeneration : MonoBehaviour
 						enemyCount++;
 						MakePatrolPoints(enemy, room);
 						enemy.transform.parent = transform.GetChild(2);
+						AddItemsToInventory(enemy.GetComponent<Inventory>());
 					}
 				}
 			}
@@ -303,8 +314,9 @@ public class DungeonGeneration : MonoBehaviour
 		BasicEnemy enemyC = enemy.GetComponent<BasicEnemy>();
 		enemyC.Fsm.patrolPoints.Clear();
 		enemyC.Fsm.patrolPoints.Add(enemyC.transform.position);
+		int patroolPointsCount = rnd.Next(minPatrolPoints, maxPatrolPoints);
 
-		for (int i = 1; i < maxPatrolPoints; i++)
+		for (int i = 1; i < patroolPointsCount; i++)
 		{
 			int x = 0;
 			int y = 0;
@@ -318,23 +330,51 @@ public class DungeonGeneration : MonoBehaviour
 		}
 	}
 
-	void TestMakePatrolPoints(TestEnemy enemy, Rectangle room)
+	void SpawnEnterExit()
 	{
-		enemy.PatrolPoints.Add(RectangleToWorld(enemy.Pos));
-		int pointsCount = rnd.Next(minPatrolPoints, maxPatrolPoints);
+		Rectangle startRoom = rooms[0];
+		Rectangle endRoom = rooms[rooms.Count - 1];
 
-		for (int i = 1; i < pointsCount; i++)
+		Point spawnPos = new Point(startRoom.left + 1 + startRoom.width / 2 + rnd.Next(0, startRoom.width / 2), startRoom.top + 1 + startRoom.height / 2 + rnd.Next(0, startRoom.height / 2));
+		Point exitPos = new Point(endRoom.left + 1 + endRoom.width / 2 + rnd.Next(0, endRoom.width / 2), endRoom.top + 1 + endRoom.height / 2 + rnd.Next(0, endRoom.height / 2));
+
+		int count = 0;
+		while (Map[spawnPos.x, spawnPos.y].HaveObject || !Map[spawnPos.x, spawnPos.y].Walkable)
 		{
-			int x = 0;
-			int y = 0;
-			do
+			spawnPos = new Point(startRoom.left + 1 + startRoom.width / 2 + rnd.Next(0, startRoom.width / 2), startRoom.top + 1 + startRoom.height / 2 + rnd.Next(0, startRoom.height / 2));
+			count++;
+			if (count > 500)
 			{
-				x = rnd.Next(room.left + 1, room.right - 1);
-				y = rnd.Next(room.top + 1, room.bottom - 1);
-			} while (Map[x, y].HaveObject);
+				spawnPos = new Point(rnd.Next(startRoom.x+1, startRoom.right-1), rnd.Next(startRoom.y+1, startRoom.bottom-1));
+			}
 
-			enemy.PatrolPoints.Add(ToWorldPosition(new Vector2(x, y)));
+			if (count > 1000)
+			{
+				return;
+			}
 		}
+
+		count = 0;
+
+		while (Map[exitPos.x, exitPos.y].HaveObject || !Map[exitPos.x, exitPos.y].Walkable)
+		{
+			exitPos = new Point(endRoom.left + 1 + endRoom.width / 2 + rnd.Next(0, endRoom.width / 2), endRoom.top + 1 + endRoom.height / 2 + rnd.Next(0, endRoom.height / 2));
+			count++;
+
+			if (count > 500)
+			{
+				exitPos = new Point(rnd.Next(endRoom.left, endRoom.right-1),rnd.Next(endRoom.top, endRoom.bottom-1));
+			}
+
+			if (count > 1000)
+			{
+				return;
+			}
+		}
+
+		Instantiate(enter, ToWorldPosition(new Vector2(spawnPos.x, spawnPos.y)), new Quaternion());
+		Instantiate(exit, ToWorldPosition(new Vector2(exitPos.x, exitPos.y)), new Quaternion());
+		Instantiate(Player, ToWorldPosition(new Vector2(spawnPos.x, spawnPos.y)), new Quaternion());
 	}
 
 	public void DrawMap()

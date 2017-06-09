@@ -28,22 +28,17 @@ public class TimeModificator : BaseModificator
 
 	public virtual void Start()
 	{
-		worker = Process;
 		endTime = (int)Time.time + totalTime;
-		worker.BeginInvoke(OnEnd, null);
+		UIManager.instance.StartCoroutine(Process());
 	}
 
-	protected virtual void Process()
+	protected virtual IEnumerator Process()
 	{
-		Thread.Sleep(TimeSpan.FromSeconds(totalTime));
-		while (true)
-		{
-			if (endTime > Time.time)
-				break;
-		}
+		yield return new WaitForSeconds(totalTime);
+		OnEnd();
 	}
 
-	protected virtual void OnEnd(IAsyncResult res)
+	protected virtual void OnEnd()
 	{
 		if (OnTimeEnd != null)
 			OnTimeEnd(this);

@@ -50,10 +50,20 @@ public class Item : MonoBehaviour
 	private SpriteRenderer spriteRenderer;
 	private Collider2D Collider;
 
-	void Awake()
+	protected virtual void Awake()
 	{
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		Collider = GetComponent<Collider2D>();
+
+		if (itemSprite == null && spriteRenderer.sprite != null)
+		{
+			itemSprite = spriteRenderer.sprite;
+		}
+
+		if (UISprite == null)
+		{
+			UISprite = itemSprite;
+		}
 	}
 
 	public virtual void Initialize(string name, string description)

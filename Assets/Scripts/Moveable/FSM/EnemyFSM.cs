@@ -7,7 +7,8 @@ public class EnemyFSM
 {
 	private FSM fsm;
 
-	[SerializeField] private float turnSpeed;
+	[SerializeField]
+	private float turnSpeed;
 
 	[SerializeField]
 	private float speed = 2f;
@@ -92,15 +93,13 @@ public class EnemyFSM
 
 	void Attack()
 	{
-		if (!MoveToPlayer(attackDistance))
+		MoveToPlayer(attackDistance);
+		if(!player.IsDead)
+			owner.Attack(player.GetComponent<PawnBehaviour>());
+		else
 		{
-			if(!player.IsDead)
-				owner.Attack(player.GetComponent<PawnBehaviour>());
-			else
-			{
-				fsm.PopState();
-				fsm.PushState(Patrol);
-			}
+			fsm.PopState();
+			fsm.PushState(FindTarget);
 		}
 	}
 
@@ -112,48 +111,38 @@ public class EnemyFSM
 			fsm.PushState(LookAround);
 		}
 	}
+	[SerializeField]
+	float[] rootAngles;
+	[SerializeField]
+	int currentAngle = 0;
 
-	private Vector2 UpDirection = Vector2.zero;
-	Vector2[] rootDirections;
-	int currentDirection = 0;
+	private bool generateAngles = false;
 
 	void LookAround()
 	{
-		if (UpDirection == Vector2.zero)
+		if (!generateAngles)
 		{
-			UpDirection = fsm.transform.up;
-			currentDirection = 0;
-			rootDirections = new Vector2[UnityEngine.Random.Range(2, 5)];
+			currentAngle = 0;
+			rootAngles = new float[UnityEngine.Random.Range(2, 5)];
 
-			float rootAngle = UnityEngine.Random.Range(1, 3) % 2 == 1 ? UnityEngine.Random.Range(-120, -60) : UnityEngine.Random.Range(60, 120);
-			float sinOfAngle = Mathf.Sin(rootAngle);
-			float cosOfAngle = Mathf.Cos(rootAngle);
-			Vector2 rootVec = new Vector2(UpDirection.x * sinOfAngle - UpDirection.y * cosOfAngle, UpDirection.x * cosOfAngle + UpDirection.y * sinOfAngle);
-
-			rootDirections[0] = rootVec;
-
-			for (int i = 1; i < rootDirections.Length; i++)
+			for (int i = 0; i < rootAngles.Length; i++)
 			{
-				rootAngle = UnityEngine.Random.Range(1, 3) % 2 == 1 ? UnityEngine.Random.Range(-120, -60) : UnityEngine.Random.Range(60, 120);
-				sinOfAngle = Mathf.Sin(rootAngle);
-				cosOfAngle = Mathf.Cos(rootAngle);
-				rootVec = new Vector2(rootDirections[i - 1].x * sinOfAngle - rootDirections[i - 1].y * cosOfAngle, rootDirections[i - 1].x * cosOfAngle + rootDirections[i - 1].y * sinOfAngle);
-				rootDirections[i] = rootVec;
+				rootAngles[i] = UnityEngine.Random.Range(1, 3) % 2 == 1 ? UnityEngine.Random.Range(-120, -60) : UnityEngine.Random.Range(60, 120);
 			}
+			generateAngles = true;
 		}
 
-		if (currentDirection < rootDirections.Length)
+		if (currentAngle < rootAngles.Length)
 		{
-			if (!Rotate(rootDirections[currentDirection], turnSpeed / 2f))
+			if (!RotateByAngle(rootAngles[currentAngle], turnSpeed / 2f))
 			{
-				currentDirection++;
+				currentAngle++;
 			}
 		}
 		else
 		{
-			UpDirection = Vector2.zero;
-			rootDirections = null;
-			currentDirection = 0;
+			currentAngle = 0;
+			generateAngles = false;
 			fsm.PopState();
 		}
 	}
@@ -272,14 +261,26 @@ public class EnemyFSM
 	{
 		Vector2 dirToLook = (target - new Vector2(owner.transform.position.x, owner.transform.position.y)).normalized;
 		float targetAngle = fov.AngleFromDir(dirToLook);
-
-		if (Mathf.Abs(Mathf.DeltaAngle(owner.transform.eulerAngles.z, targetAngle)) > 1.1f)
+		float deltaangle = Mathf.DeltaAngle(owner.transform.eulerAngles.z, targetAngle);
+		if (Mathf.Abs(deltaangle) > 0.1f)
 		{
-			float rootAngle = Mathf.MoveTowardsAngle(owner.transform.eulerAngles.z, targetAngle, speed * Time.fixedDeltaTime);
+			float rootAngle = Mathf.MoveTowardsAngle(owner.transform.eulerAngles.z, targetAngle, speed * Time.deltaTime);
 			owner.transform.eulerAngles = Vector3.forward * rootAngle;
 			return true;
 		}
 		return false;
+	}
+
+	bool RotateByAngle(float angle, float speed)
+	{
+		if (Mathf.Abs(Mathf.DeltaAngle(owner.transform.eulerAngles.z, angle))>0.1f)
+		{
+			float rootAngle = Mathf.MoveTowardsAngle(owner.transform.eulerAngles.z, angle, speed * Time.deltaTime);
+			owner.transform.eulerAngles = Vector3.forward * rootAngle;
+			return true;
+		}
+		return false;
+
 	}
 
 	public void DrawGizmos()

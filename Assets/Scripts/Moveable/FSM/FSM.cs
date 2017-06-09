@@ -6,10 +6,12 @@ using System.Collections.Generic;
 public class FSM : MonoBehaviour
 {
 	private Stack<Action> states = new Stack<Action>();
+	public bool isDead = false;
 
 	void Update()
 	{
-		GetCurrentState().Invoke();
+		if(!isDead)
+			GetCurrentState().Invoke();
 	}
 
 	public void PushState(Action state)

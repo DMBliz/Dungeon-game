@@ -7,10 +7,15 @@ public class BaseAttribute
 {
 	public event Action<BaseModificator> OnAddModificator;
 	public event Action<BaseModificator> OnRemoveModificator;
-
+	public event Action OnZero;
+	public event Action<BaseAttribute,float> OnValueChange;
+	[SerializeField]
 	private List<BaseModificator> modificators = new List<BaseModificator>();
+	[SerializeField]
 	private float maxValue;
+	[SerializeField]
 	private float finalValue;
+	[SerializeField]
 	private string name;
 	private string description;
 
@@ -35,7 +40,18 @@ public class BaseAttribute
 	public float FinalValue
 	{
 		get { return finalValue; }
-		set { finalValue = value; }
+		set
+		{
+			float temp = finalValue;
+			finalValue = value;
+			if (finalValue > maxValue) finalValue = maxValue;
+			if (OnValueChange != null)
+				OnValueChange(this, finalValue - temp);
+			if (finalValue <= 0 && OnZero != null)
+			{
+				OnZero();
+			}
+		}
 	}
 
 	public BaseAttribute(string name, string description, float maxValue)
@@ -51,29 +67,37 @@ public class BaseAttribute
 		if (modificator is TimeModificator)
 		{
 			(modificator as TimeModificator).OnTimeEnd += OnEnd;
+			(modificator as TimeModificator).Start();
 		}
 		if (modificator is TimeChangeModificator)
 		{
-			(modificator as TimeChangeModificator).OnValueChange += OnValueChange;
+			(modificator as TimeChangeModificator).OnValueChange += ValueChange;
 		}
-		
-		modificators.Add(modificator);
 
 		if (modificator.Type == ModificatorType.Multiplaer)
 		{
-			finalValue *= modificator.Value;
-			TimeModificator temp = (TimeModificator) modificator;
+			TimeModificator temp = (TimeModificator)modificator;
 			if (temp != null && temp.IsMax)
 			{
 				maxValue *= modificator.Value;
 			}
+			FinalValue *= modificator.Value;
 		}
 
-		if (finalValue > maxValue)
-			finalValue = maxValue;
+		if (modificator.GetType() != typeof(BaseModificator))
+		{
+			modificators.Add(modificator);
+			if (OnAddModificator != null)
+				OnAddModificator(modificator);
+		}
+		else
+		{
+			if (modificator.Type == ModificatorType.Additive)
+			{
+				FinalValue += modificator.Value;
+			}
+		}
 
-		if (OnAddModificator != null)
-			OnAddModificator(modificator);
 	}
 
 	public void RemoveModificator(BaseModificator modificator)
@@ -82,7 +106,7 @@ public class BaseAttribute
 
 		if (modificator.Type == ModificatorType.Multiplaer)
 		{
-			finalValue /= modificator.Value;
+			FinalValue /= modificator.Value;
 			TimeModificator temp = (TimeModificator)modificator;
 			if (temp != null && temp.IsMax)
 			{
@@ -96,11 +120,8 @@ public class BaseAttribute
 		}
 		if (modificator is TimeChangeModificator)
 		{
-			(modificator as TimeChangeModificator).OnValueChange -= OnValueChange;
+			(modificator as TimeChangeModificator).OnValueChange -= ValueChange;
 		}
-
-		if (finalValue > maxValue)
-			finalValue = maxValue;
 
 		if (OnRemoveModificator != null)
 			OnRemoveModificator(modificator);
@@ -111,10 +132,11 @@ public class BaseAttribute
 		RemoveModificator(modificator);
 	}
 
-	protected virtual void OnValueChange(TimeChangeModificator modificator)
+	protected virtual void ValueChange(TimeChangeModificator modificator)
 	{
-		finalValue += modificator.Value;
-		if (finalValue > maxValue)
-			finalValue = maxValue;
+		FinalValue += modificator.Value;
+
+		if (OnValueChange != null)
+			OnValueChange(this,modificator.Value);
 	}
 }

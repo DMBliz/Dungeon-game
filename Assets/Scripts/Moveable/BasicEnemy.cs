@@ -16,10 +16,32 @@ public class BasicEnemy : PawnBehaviour
 	{
 		base.Awake();
 		fsm.Init(GetComponent<FSM>(),this);
+		
+	}
+
+	void Start()
+	{
+		GameObject weap = Instantiate(PrefabHolder.instance.getWeaponByName("Silver sword"));
+		Equip(weap.GetComponent<Item>());
+		fsm.AttackDistance = EquipedWeapon.weaponStats.RangeOfAttack;
+
 	}
 	
 	void OnDrawGizmos()
 	{
 		fsm.DrawGizmos();
+	}
+
+	public override void TakeDamage(float value, List<WeaponEffect> effects)
+	{
+		base.TakeDamage(value, effects);
+		print(name + " take damage:" + value + ":"+specs.GetStat<BaseAttribute>("Health").FinalValue);
+	}
+
+	protected override void Die()
+	{
+		base.Die();
+		GetComponent<FSM>().isDead = IsDead;
+		Debug.Log(name + " dead");
 	}
 }

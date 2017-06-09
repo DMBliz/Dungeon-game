@@ -7,43 +7,64 @@ public class SpecsHolder : MonoBehaviour
 {
 	public event Action<BaseModificator> OnAddModificator;
 	public event Action<BaseModificator> OnRemoveModificator;
+	[SerializeField]
 	private List<BaseStat> stats = new List<BaseStat>();
+	[SerializeField]
 	private List<BaseAttribute> attributes = new List<BaseAttribute>();
+
+	void Awake()
+	{
+		UpdateEvents();
+	}
 
 	public void AddSpec<T>(T spec)
 	{
-		if (typeof(T) == typeof(BaseStat))
+		BaseStat tempStat = spec as BaseStat;
+		if (tempStat != null)
 		{
-			stats.Add(spec as BaseStat);
+			stats.Add(tempStat);
 		}
-
-		if (typeof(T) == typeof(BaseAttribute))
+		else
 		{
-			attributes.Add(spec as BaseAttribute);
+			BaseAttribute tempAttribute = spec as BaseAttribute;
+			if (tempAttribute != null)
+			{
+				attributes.Add(tempAttribute);
+			}
 		}
 
 		UpdateEvents();
 	}
 
-	public void UpdateEvents()
+	void UpdateEvents()
 	{
 		foreach (BaseStat stat in stats)
 		{
-			stat.OnAddModificator -= OnAddModificator;
-			stat.OnRemoveModificator -= OnRemoveModificator;
+			stat.OnAddModificator -= OnAddModificatorM;
+			stat.OnRemoveModificator -= OnRemoveModificatorM;
 
-			stat.OnAddModificator += OnAddModificator;
-			stat.OnRemoveModificator += OnRemoveModificator;
+			stat.OnAddModificator += OnAddModificatorM;
+			stat.OnRemoveModificator += OnRemoveModificatorM;
 		}
 
-		foreach (BaseAttribute stat in attributes)
+		foreach (BaseAttribute attribute in attributes)
 		{
-			stat.OnAddModificator -= OnAddModificator;
-			stat.OnRemoveModificator -= OnRemoveModificator;
+			attribute.OnAddModificator -= OnAddModificatorM;
+			attribute.OnRemoveModificator -= OnRemoveModificatorM;
 
-			stat.OnAddModificator += OnAddModificator;
-			stat.OnRemoveModificator += OnRemoveModificator;
+			attribute.OnAddModificator += OnAddModificatorM;
+			attribute.OnRemoveModificator += OnRemoveModificatorM;
 		}
+	}
+
+	void OnAddModificatorM(BaseModificator modificator)
+	{
+		if (OnAddModificator != null) OnAddModificator(modificator);
+	}
+
+	void OnRemoveModificatorM(BaseModificator modificator)
+	{
+		if (OnRemoveModificator != null) OnRemoveModificator(modificator);
 	}
 
 	public void AddEffects(List<Effect> effects)
@@ -108,11 +129,19 @@ public class SpecsHolder : MonoBehaviour
 			return;
 		}
 		stat.AddModificator(modificator);
+
+		if (OnAddModificator != null)
+		{
+			OnAddModificator(modificator);
+		}
 	}
 
 	public void RemoveModificator(BaseModificator modificator)
 	{
-		
+		if (OnRemoveModificator != null)
+		{
+			OnRemoveModificator(modificator);
+		}
 	}
 
 	public T GetStat<T>(string name) where T : class

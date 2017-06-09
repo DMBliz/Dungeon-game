@@ -9,14 +9,10 @@ public class Effect
 	{
 		get
 		{
-			if (id > 0)
-			{
-				return Modificators.instance.GetModificator(id);
-			}
-			else
-			{
-				return Modificators.instance.GetModificator(name);
-			}
+			BaseModificator mod = Modificators.instance.GetModificator(id);
+			if (mod != null)
+				return mod;
+			return Modificators.instance.GetModificator(name);
 		}
 	}
 

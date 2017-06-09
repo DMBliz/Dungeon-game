@@ -14,12 +14,7 @@ public class Inventory : MonoBehaviour
 	int maxCapacity = 5;
 	public int MaxCapacity { get { return maxCapacity; } protected set { maxCapacity = value; } }
 
-	public void SetCapacity(int count)
-	{
-		maxCapacity = count;
-	}
-
-	public bool AddItem(Item item)
+	public void AddItem(Item item)
 	{
 		if (_items.Count - 1 < maxCapacity)
 		{
@@ -31,16 +26,14 @@ public class Inventory : MonoBehaviour
 			{
 				OnAddItem(item);
 			}
-			return true;
 		}
-		return false;
 	}
 
-	public bool RemoveItem(Item item)
+	public void RemoveItem(Item item)
 	{
 		if (_items.Count == 0)
 		{
-			return false;
+			return;
 		}
 
 		if (_items.Contains(item))
@@ -48,11 +41,37 @@ public class Inventory : MonoBehaviour
 			_items.Remove(item);
 			item.OnItemDrop -= DropItem;
 			item.OnItemTransfer -= TransferItem;
+			item.MoveToWorld(transform.position);
 			if (OnRemoveItem != null)
 			{
 				OnRemoveItem(item);
 			}
-			return true;
+		}
+	}
+
+	public void DestroyItem(Item item)
+	{
+		if (_items.Contains(item))
+		{
+			_items.Remove(item);
+			item.OnItemDrop -= DropItem;
+			item.OnItemTransfer -= TransferItem;
+			item.MoveToWorld(transform.position);
+			if (OnRemoveItem != null)
+			{
+				OnRemoveItem(item);
+			}
+		}
+
+		Destroy(item.gameObject);
+	}
+
+	public bool Contains(Item item)
+	{
+		foreach (Item invItem in items)
+		{
+			if (item == invItem)
+				return true;
 		}
 		return false;
 	}

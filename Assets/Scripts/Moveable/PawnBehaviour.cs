@@ -6,6 +6,7 @@ public abstract class PawnBehaviour : MonoBehaviour
 {
 	public Inventory inventory;
 	public SpecsHolder specs;
+	public string enemyTag;
 
 	[SerializeField]
 	public Weapon EquipedWeapon;
@@ -16,7 +17,7 @@ public abstract class PawnBehaviour : MonoBehaviour
 	private bool isDead = false;
 
 	[SerializeField]
-	private Transform weaponSlot;
+	protected Transform weaponSlot;
 
 	public bool IsDead
 	{
@@ -28,6 +29,8 @@ public abstract class PawnBehaviour : MonoBehaviour
 	{
 		inventory = GetComponent<Inventory>();
 		specs = GetComponent<SpecsHolder>();
+		specs.AddSpec(new BaseAttribute("Health", "This is health", 100));
+		specs.GetStat<BaseAttribute>("Health").OnZero += Die;
 	}
 
 	public virtual void Attack(PawnBehaviour target)
@@ -41,7 +44,7 @@ public abstract class PawnBehaviour : MonoBehaviour
 	public virtual void Use(Item item)
 	{
 		specs.AddEffects(item.effects);
-		inventory.RemoveItem(item);
+		inventory.DestroyItem(item);
 	}
 
 	public virtual void Equip(Item item)
@@ -51,25 +54,35 @@ public abstract class PawnBehaviour : MonoBehaviour
 			if (EquipedWeapon != null)
 			{
 				inventory.AddItem(EquipedWeapon);
-				EquipedWeapon = item as Weapon;
+				EquipedWeapon.transform.SetParent(null);
 			}
-			else
-			{
-				EquipedWeapon = item as Weapon;
-			}
-			inventory.RemoveItem(item);
+			if(inventory.Contains(item))
+				inventory.RemoveItem(item);
+			EquipedWeapon = (Weapon) item;
 			EquipedWeapon.transform.SetParent(weaponSlot);
+			EquipedWeapon.transform.localPosition=Vector3.zero;
+			EquipedWeapon.transform.localRotation=Quaternion.identity;
+			EquipedWeapon.GetComponent<Collider2D>().enabled = false;
+			EquipedWeapon.anim = GetComponent<Animator>();
 		}
 	}
 
 	public virtual void TakeDamage(float value, List<WeaponEffect> effects)
 	{
-		specs.GetStat<BaseAttribute>("Health").FinalValue -= value;
-		specs.AddEffects(effects);
+		if (!isDead)
+		{
+			specs.GetStat<BaseAttribute>("Health").FinalValue += value;
+			if (effects != null)
+				specs.AddEffects(effects);
+			DamagePopUpManager.instance.PopUpDamge(Mathf.Abs(value).ToString("####"), transform.position);
+		}
 	}
 
-	public virtual void Die()
+	protected  virtual void Die()
 	{
-		
+		isDead = true;
+		EquipedWeapon.MoveToWorld(weaponSlot.transform.position);
+		EquipedWeapon.transform.SetParent(null);
+		EquipedWeapon = null;
 	}
 }

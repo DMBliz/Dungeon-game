@@ -35,9 +35,9 @@ public class ItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 
 	public void OnBeginDrag(PointerEventData eventData)
 	{
-		transform.position = eventData.position;
 		transform.SetParent(_currentSlot.transform.parent);
 		GetComponent<CanvasGroup>().blocksRaycasts = false;
+		transform.position = eventData.position;
 	}
 
 	public void OnDrag(PointerEventData eventData)
@@ -89,14 +89,22 @@ public class ItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 
 	public void Equip()
 	{
-		currentSlot.containerUI.inventory.GetComponent<PawnBehaviour>().Equip(item);
-		UnSubcribeActions();
+		PawnBehaviour owner = currentSlot.containerUI.inventory.GetComponent<PawnBehaviour>();
+		if (owner != null)
+		{
+			currentSlot.containerUI.inventory.GetComponent<PawnBehaviour>().Equip(item);
+			UnSubcribeActions();
+		}
 	}
 
 	public void Consume()
 	{
-		currentSlot.containerUI.inventory.GetComponent<PawnBehaviour>().Use(item);
-		UnSubcribeActions();
+		PawnBehaviour owner = currentSlot.containerUI.inventory.GetComponent<PawnBehaviour>();
+		if (owner != null)
+		{
+			owner.Use(item);
+			UnSubcribeActions();
+		}
 	}
 
 	public void Drop()
@@ -117,7 +125,7 @@ public class ItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 	{
 		if (eventData.button == PointerEventData.InputButton.Right)
 		{
-			UIManager.instance.ShowInventoryMenu(item.IsEquipable, item.IsEquipable);
+			UIManager.instance.ShowInventoryMenu(item.IsConsumable,item.IsEquipable);
 			UIManager.instance.OnDropAction += Drop;
 			UIManager.instance.OnEquipAction += Equip;
 			UIManager.instance.OnUseAction += Consume;

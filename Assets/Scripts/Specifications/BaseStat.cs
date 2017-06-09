@@ -8,9 +8,12 @@ public class BaseStat
 	public event Action<BaseModificator> OnAddModificator;
 	public event Action<BaseModificator> OnRemoveModificator;
 
+	[SerializeField]
 	private List<BaseModificator> modificators = new List<BaseModificator>();
 	private int baseValue;
+	[SerializeField]
 	private int finalValue;
+	[SerializeField]
 	private string statName;
 	private string statDescription;
 
