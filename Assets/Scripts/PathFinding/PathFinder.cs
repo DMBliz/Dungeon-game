@@ -11,7 +11,6 @@ public class PathFinder : MonoBehaviour
 	{
 		grid = GetComponent<Grid>();
 	}
-	
 
 	public void FindPath(PathRequest request,  Action<PathResult> callback)
 	{

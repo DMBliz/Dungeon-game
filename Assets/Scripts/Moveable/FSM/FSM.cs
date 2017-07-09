@@ -10,8 +10,9 @@ public class FSM : MonoBehaviour
 
 	void Update()
 	{
-		if(!isDead)
-			GetCurrentState().Invoke();
+		Action curState = GetCurrentState();
+		if (!isDead && curState!=null)
+			curState.Invoke();
 	}
 
 	public void PushState(Action state)
@@ -26,6 +27,8 @@ public class FSM : MonoBehaviour
 
 	public Action GetCurrentState()
 	{
-		return states.Peek();
+		if (states.Count > 0)
+			return states.Peek();
+		else return null;
 	}
 }

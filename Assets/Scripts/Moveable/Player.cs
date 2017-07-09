@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : PawnBehaviour
 {
@@ -14,6 +15,7 @@ public class Player : PawnBehaviour
 
 	private Inventory findedInventory;
 	private Item findedItem;
+	private DungeonDoor findedDoor;
 
 	[SerializeField]
 	private bool inInteraction = false;
@@ -26,7 +28,7 @@ public class Player : PawnBehaviour
 	{
 		base.Awake();
 		player = this;
-		CameraManager.instance.target = gameObject;
+		CameraManager.instance.Target = gameObject;
 	}
 
 	void Start()
@@ -50,7 +52,7 @@ public class Player : PawnBehaviour
 
 	void Update()
 	{
-		if (Input.GetMouseButtonDown(0))
+		if (Input.GetMouseButtonDown(0) && !inInteraction)
 		{
 			Attack(null);
 		}
@@ -60,6 +62,37 @@ public class Player : PawnBehaviour
 	{
 		if (EquipedWeapon != null) 
 		EquipedWeapon.PlayerAttack(this, attackAngle);
+	}
+
+	public void UpdatePlayer()
+	{
+		UIManager.instance.OnPressInteractionButton += Interact;
+
+		specs.OnAddModificator += UIManager.instance.AddEffect;
+		specs.OnRemoveModificator += UIManager.instance.RemoveEffect;
+		specs.GetStat<BaseAttribute>("Health").OnValueChange += UpdateHealth;
+
+		BaseAttribute health = specs.GetStat<BaseAttribute>("Health");
+		UIManager.instance.SetHealthBarValue(health.FinalValue, health.MaxValue);
+		inventory.UpdateItemEvents();
+		foreach (Item item in inventory.items)
+		{
+			if(item!=null)
+				SceneManager.MoveGameObjectToScene(item.gameObject, SceneManager.GetActiveScene());
+		}
+		UIManager.instance.playerInventory.transform.GetChild(1).GetComponent<InventoryUI>().inventory = inventory;
+		
+	}
+
+	void SaveInventory()
+	{
+		foreach (Item item in inventory.items)
+		{
+			DontDestroyOnLoad(item.gameObject);
+		}
+		inventory.ClearEvents();
+		specs.ClearEvents();
+		DontDestroyOnLoad(gameObject);
 	}
 
 	IEnumerator FindInventory()
@@ -81,15 +114,22 @@ public class Player : PawnBehaviour
 			{
 				findedItem = null;
 				findedInventory = null;
+				findedDoor = null;
 				Collider2D[] things = Physics2D.OverlapCircleAll(transform.position, SearchRadius);
 				float minDist = float.MaxValue;
 				Collider2D col = null;
 				for (int i = 0; i < things.Length; i++)
 				{
 					Inventory inv = things[i].GetComponent<Inventory>();
+					DungeonDoor door = things[i].GetComponent<DungeonDoor>();
 
-					if (inv == null && things[i].GetComponent<Item>() == null) 
+					if (inv == null && things[i].GetComponent<Item>() == null && door == null) 
 						continue;
+
+					if (door != null)
+					{
+						findedDoor = door;
+					}
 
 					if (inv != null)
 					{
@@ -124,6 +164,10 @@ public class Player : PawnBehaviour
 				{
 					UIManager.instance.ShowTextInfo("Press E to pick Up " + findedItem.itemName);
 				}
+				else if (findedDoor != null)
+				{
+					UIManager.instance.ShowTextInfo(findedDoor.IsEnter ? "Press E to enter previous dungeon" : "Press E to enter next dungeon");
+				}
 				else
 				{
 					UIManager.instance.HideTextInfo();
@@ -132,7 +176,7 @@ public class Player : PawnBehaviour
 		}
 	}
 
-	public void Interact()
+	void Interact()
 	{
 		if (inInteraction)
 		{
@@ -153,6 +197,10 @@ public class Player : PawnBehaviour
 			{
 				inventory.AddItem(findedItem);
 				findedItem = null;
+			}else if (findedDoor != null)
+			{
+				SaveInventory();
+				findedDoor.LoadLevel();
 			}
 
 			UIManager.instance.HideTextInfo();
@@ -170,6 +218,13 @@ public class Player : PawnBehaviour
 		base.TakeDamage(value, effects);
 		BaseAttribute health = specs.GetStat<BaseAttribute>("Health");
 		UIManager.instance.SetHealthBarValue(health.FinalValue, health.MaxValue);
+	}
+
+	protected override void Die()
+	{
+		base.Die();
+		GetComponent<PlayerController>().Die();
+		UIManager.instance.ShowDieMenu();
 	}
 
 	public void OnDrawGizmos()

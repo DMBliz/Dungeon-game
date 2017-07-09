@@ -1,5 +1,8 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
+using Random = System.Random;
 
 public class DungeonGeneration : MonoBehaviour
 {
@@ -36,9 +39,7 @@ public class DungeonGeneration : MonoBehaviour
 	[SerializeField]
 	private bool drawRooms = false;
 	[SerializeField]
-	private GameObject enter;
-	[SerializeField]
-	private GameObject exit;
+	private GameObject Door;
 	[SerializeField]
 	private GameObject Player;
 
@@ -92,7 +93,13 @@ public class DungeonGeneration : MonoBehaviour
 		Map = new TileInfo[width, height];
 	}
 
-
+	public string Seed
+	{
+		get { return seed; }
+		set { seed = value;
+			rnd = new Random(seed.GetHashCode());
+		}
+	}
 
 	public void Generate()
 	{
@@ -372,9 +379,22 @@ public class DungeonGeneration : MonoBehaviour
 			}
 		}
 
-		Instantiate(enter, ToWorldPosition(new Vector2(spawnPos.x, spawnPos.y)), new Quaternion());
-		Instantiate(exit, ToWorldPosition(new Vector2(exitPos.x, exitPos.y)), new Quaternion());
-		Instantiate(Player, ToWorldPosition(new Vector2(spawnPos.x, spawnPos.y)), new Quaternion());
+		DungeonDoor enterDoor = Instantiate(Door, ToWorldPosition(new Vector2(spawnPos.x, spawnPos.y)), new Quaternion()).GetComponent<DungeonDoor>();
+		enterDoor.IsEnter = true;
+		DungeonDoor exitDoor = Instantiate(Door, ToWorldPosition(new Vector2(exitPos.x, exitPos.y)), new Quaternion()).GetComponent<DungeonDoor>();
+		exitDoor.IsEnter = false;
+		GameObject player = GameObject.FindGameObjectWithTag("Player");
+		if (player != null)
+		{
+			SceneManager.MoveGameObjectToScene(player, SceneManager.GetActiveScene());
+			player.transform.position = Level.wasHere ? ToWorldPosition(new Vector2(exitPos.x, exitPos.y)) : ToWorldPosition(new Vector2(spawnPos.x, spawnPos.y));
+			Camera.main.GetComponent<CameraManager>().Target = player;
+
+		}
+		else
+		{
+			Instantiate(Player, Level.wasHere ? ToWorldPosition(new Vector2(exitPos.x, exitPos.y)) : ToWorldPosition(new Vector2(spawnPos.x, spawnPos.y)), new Quaternion());
+		}
 	}
 
 	public void DrawMap()

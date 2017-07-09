@@ -16,7 +16,7 @@ public class Slot : MonoBehaviour, IDropHandler
 			item = value;
 			if (item != null)
 			{
-				item.transform.position = transform.position;
+				item.transform.position = transform.position; 
 				if (item.currentSlot != this)
 					item.currentSlot = this;
 			}

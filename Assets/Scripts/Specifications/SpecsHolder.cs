@@ -95,24 +95,10 @@ public class SpecsHolder : MonoBehaviour
 		}
 	}
 
-	public void Remove(string name)
+	public void ClearEvents()
 	{
-		foreach (BaseStat stat in stats)
-		{
-			if (stat.StatName == name)
-			{
-				stats.Remove(stat);
-				return;
-			}
-		}
-		foreach (BaseAttribute attribute in attributes)
-		{
-			if (attribute.Name == name)
-			{
-				attributes.Remove(attribute);
-				return;
-			}
-		}
+		OnAddModificator = null;
+		OnRemoveModificator = null;
 	}
 
 	public void AddModificator(string name, BaseModificator modificator)
@@ -133,14 +119,6 @@ public class SpecsHolder : MonoBehaviour
 		if (OnAddModificator != null)
 		{
 			OnAddModificator(modificator);
-		}
-	}
-
-	public void RemoveModificator(BaseModificator modificator)
-	{
-		if (OnRemoveModificator != null)
-		{
-			OnRemoveModificator(modificator);
 		}
 	}
 

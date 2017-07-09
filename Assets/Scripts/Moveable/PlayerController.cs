@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
@@ -6,6 +7,8 @@ public class PlayerController : MonoBehaviour
 
 	[SerializeField]
 	private float speed = 5f;
+
+	private bool isDead = false;
 
 	private Rigidbody2D rigidbody2d;
 	private float increaseSpeed = 0f;
@@ -26,36 +29,46 @@ public class PlayerController : MonoBehaviour
 
 	void Update()
 	{
-		dir = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
-		if (Input.GetKeyDown(KeyCode.Space) && coolDown <= 0f && dir.magnitude > 0)
+		if (!isDead)
 		{
-			increaseSpeed = maxIncrease;
-			coolDown = coolDownTime;
-		}
-		if (coolDown > 0)
-		{
-			coolDown -= Time.deltaTime;
-		}
+			dir = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
+			if (Input.GetKeyDown(KeyCode.Space) && coolDown <= 0f && dir.magnitude > 0)
+			{
+				increaseSpeed = maxIncrease;
+				coolDown = coolDownTime;
+			}
+			if (coolDown > 0)
+			{
+				coolDown -= Time.deltaTime;
+			}
 
-		targetVector = Camera.main.ScreenToWorldPoint(UnityEngine.Input.mousePosition) - transform.position;
-		float targetAngle = Mathf.Atan2(targetVector.y, targetVector.x) * Mathf.Rad2Deg - 90;
-		float angle = Mathf.MoveTowardsAngle(transform.eulerAngles.z, targetAngle, turnSpeed * Time.deltaTime);
-		transform.eulerAngles = Vector3.forward * angle;
+			targetVector = Camera.main.ScreenToWorldPoint(UnityEngine.Input.mousePosition) - transform.position;
+			float targetAngle = Mathf.Atan2(targetVector.y, targetVector.x) * Mathf.Rad2Deg - 90;
+			float angle = Mathf.MoveTowardsAngle(transform.eulerAngles.z, targetAngle, turnSpeed * Time.deltaTime);
+			transform.eulerAngles = Vector3.forward * angle;
+		}
 	}
 
 	void FixedUpdate()
 	{
-		//transform.Translate(dir * behaviour.specs.GetStat("Strength").Value * Time.deltaTime); 
+		if (!isDead)
+		{
+			if (increaseSpeed > 0)
+			{
+				rigidbody2d.velocity = dir * speed * increaseSpeed * Time.fixedDeltaTime;
+				increaseSpeed -= maxIncrease * 0.15f;
+			}
+			else
+			{
+				rigidbody2d.velocity = dir * speed * Time.fixedDeltaTime;
+			}
+		}
+	}
 
-		if (increaseSpeed > 0)
-		{
-			rigidbody2d.velocity = dir * speed * increaseSpeed * Time.fixedDeltaTime;
-			increaseSpeed -= maxIncrease * 0.15f;
-		}
-		else
-		{
-			rigidbody2d.velocity = dir * speed * Time.fixedDeltaTime;
-		}
+	public void Die()
+	{
+		isDead = true;
+		rigidbody2d.velocity = Vector2.zero;
 	}
 
 	void OnDrawGizmos()

@@ -76,6 +76,22 @@ public class Inventory : MonoBehaviour
 		return false;
 	}
 
+	public void ClearEvents()
+	{
+		OnAddItem = null;
+		OnRemoveItem = null;
+	}
+
+	public void UpdateItemEvents()
+	{
+		foreach (Item item in items)
+		{
+			item.ClearEvents();
+			item.OnItemDrop += DropItem;
+			item.OnItemTransfer += TransferItem;
+		}
+	}
+
 	public void DropItem(Item item)
 	{
 		RemoveItem(item);

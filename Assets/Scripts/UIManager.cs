@@ -33,6 +33,10 @@ public class UIManager : MonoBehaviour
 
 	[SerializeField]
 	private UIModificatorPanel modificatorsPanel;
+	[SerializeField]
+	private DieMenu dieMenu;
+	[SerializeField]
+	private GameObject UI;
 
 	public event Action OnDropAction;
 	public event Action OnUseAction;
@@ -53,11 +57,6 @@ public class UIManager : MonoBehaviour
 
 		healthBarSlider = healthBar.GetComponent<Slider>();
 		healthBarText = healthBar.transform.GetChild(2).GetComponent<Text>();
-	}
-
-	void Start ()
-	{
-		//toolTipText.text = "Huge Sword \nDamage: <color=green>5</color>-<color=blue>10</color>\nSpeed: <color=red>1s</color>\n\nThis sword was..";
 	}
 
 	void Update ()
@@ -188,5 +187,18 @@ public class UIManager : MonoBehaviour
 	public void RemoveEffect(BaseModificator modificator)
 	{
 		modificatorsPanel.RemoveModificator(modificator);
+	}
+
+	public void ShowDieMenu()
+	{
+		dieMenu.SetActive();
+		UI.SetActive(false);
+	}
+
+	public void Win()
+	{
+		dieMenu.SetActive();
+		dieMenu.Win();
+		UI.SetActive(false);
 	}
 }

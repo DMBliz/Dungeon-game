@@ -66,12 +66,6 @@ public class Item : MonoBehaviour
 		}
 	}
 
-	public virtual void Initialize(string name, string description)
-	{
-		this.itemName = name;
-		this.description = description;
-	}
-
 	public virtual void Initialize(string description)
 	{
 		this.itemName = GetType().ToString();
@@ -97,6 +91,12 @@ public class Item : MonoBehaviour
 		{
 			OnItemDrop(this);
 		}
+	}
+
+	public void ClearEvents()
+	{
+		OnItemTransfer = null;
+		OnItemDrop = null;
 	}
 
 	public virtual void Transfer(Inventory newOwner)

@@ -21,15 +21,18 @@ public class WorldManager : MonoBehaviour
 		if (generateDungeon)
 		{
 			CurrentDungeon = GameObject.FindGameObjectWithTag("Dungeon").GetComponent<DungeonGeneration>();
+			if (!Level.generated)
+			{
+				Level.GenerateLevels();
+			}
+			else
+			{
+				GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().UpdatePlayer();
+			}
+			CurrentDungeon.Seed = Level.NextLevel();
 			CurrentDungeon.Generate();
 			CurrentDungeon.DrawMap();
 
 		}
 	}
-
-	void Update()
-	{
-
-	}
-	
 }

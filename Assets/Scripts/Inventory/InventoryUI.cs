@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public class InventoryUI : MonoBehaviour//TODO: make inventory UI under dragging thing
+public class InventoryUI : MonoBehaviour
 {
 	[SerializeField]
 	private Inventory _inventory;

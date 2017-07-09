@@ -53,8 +53,8 @@ public abstract class PawnBehaviour : MonoBehaviour
 		{
 			if (EquipedWeapon != null)
 			{
-				inventory.AddItem(EquipedWeapon);
 				EquipedWeapon.transform.SetParent(null);
+				inventory.AddItem(EquipedWeapon);
 			}
 			if(inventory.Contains(item))
 				inventory.RemoveItem(item);
@@ -80,9 +80,12 @@ public abstract class PawnBehaviour : MonoBehaviour
 
 	protected  virtual void Die()
 	{
-		isDead = true;
-		EquipedWeapon.MoveToWorld(weaponSlot.transform.position);
-		EquipedWeapon.transform.SetParent(null);
-		EquipedWeapon = null;
+		if (!isDead)
+		{
+			isDead = true;
+			EquipedWeapon.MoveToWorld(weaponSlot.transform.position);
+			EquipedWeapon.transform.SetParent(null);
+			EquipedWeapon = null;
+		}
 	}
 }

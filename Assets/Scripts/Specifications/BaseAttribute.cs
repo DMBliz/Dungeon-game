@@ -50,6 +50,7 @@ public class BaseAttribute
 			if (finalValue <= 0 && OnZero != null)
 			{
 				OnZero();
+				finalValue = 0;
 			}
 		}
 	}
